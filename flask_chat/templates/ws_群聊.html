@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<p><input type="text" id="nickname">
+    <button onclick="create_conn()">登录聊天室</button>
+</p>
+<p><input type="text" id="content">
+    <button onclick="send_msg()">发送消息</button>
+</p>
+<div id="message" style="width: 300px; border:2px solid red;">
+
+</div>
+
+</body>
+<script type="text/javascript">
+    var ws = null;
+    var nickname = null;
+
+    function create_conn() {
+        nickname = document.getElementById("nickname").value;
+        ws = new WebSocket("ws://192.168.15.108:9527/ws/" + nickname);
+        ws.onopen = function () {
+            alert("欢迎登陆九聊");
+        };
+        ws.onmessage = function (data) {
+            var ws_msg = JSON.parse(data.data);
+            create_chat(ws_msg);
+        };
+    }
+
+
+    function create_chat(text, self) {
+        var ptag = document.createElement("p");
+        if (self == "w") {
+            ptag.style.cssText = "text-align: right";
+            ptag.innerText = text.msg + ":" + text.sender;
+        } else {
+            ptag.style.cssText = "text-align: left";
+            ptag.innerText = text.sender + ":" + text.msg;
+        }
+
+
+        document.getElementById("message").appendChild(ptag);
+    }
+
+    function send_msg() {
+        var msg = document.getElementById("content").value;
+        // msg_json = JSON.stringify({"to_user":"","msg":msg});
+        ws.send(msg_json);
+
+        create_chat({sender:nickname,msg:msg}, "w");
+    };
+
+
+</script>
+</html>
